@@ -6,7 +6,7 @@ let authors = [
   {
     name: 'Robert Martin',
     id: "afa51ab0-344d-11e9-a414-719c6709cf3e",
-    born: 1952,
+    born: 1952
   },
   {
     name: 'Martin Fowler',
@@ -25,7 +25,7 @@ let authors = [
   { 
     name: 'Sandi Metz', // birthyear not known
     id: "afa5b6f3-344d-11e9-a414-719c6709cf3e",
-  },
+  }
 ]
 
 
@@ -83,7 +83,7 @@ let books = [
     author: 'Fyodor Dostoevsky',
     id: "afa5de04-344d-11e9-a414-719c6709cf3e",
     genres: ['classic', 'revolution']
-  },
+  }
 ]
 
 const typeDefs = gql`
@@ -168,7 +168,6 @@ const resolvers = {
                     foundAuthor
                     ? null 
                     : authors = authors.concat(author)
-
                     books = books.concat(book)
                     return book 
           },
