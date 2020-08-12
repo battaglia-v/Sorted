@@ -1,22 +1,46 @@
-import { gql } from '@apollo/client'
+import { gql } from 'apollo-boost'
 
 
-export const ALL_AUTHORS = gql`
-  query  {
-    allAuthors  {
-      name
-      id
-      born
-      bookCount
-    }
+export const GET_ALL_AUTHORS = gql`
+query {
+  allAuthors {
+    id
+    name
+    born
+    bookCount
   }
+}
 `
 
-export const ALL_BOOKS = gql`
-query  {
-  allBooks  {
+export const GET_ALL_BOOKS = gql`
+query getAllBooks($author: String, $genre: String) {
+  allBooks(author: $author, genre: $genre) {
     title
-    author
+    author {
+      name
+      born
+    }
+    published
+    id
+  }
+}
+`
+
+export const CREATE_BOOK = gql` 
+mutation createBook(
+  $title: String!
+  $author: String!
+  $published: Int!
+  $genres: [String!]!
+  ){
+  addBook(
+      title: $title
+      author: $author
+      published: $published
+      genres: $genres
+  ) {
+    title
+    author 
     published
     genres
     id
@@ -24,29 +48,16 @@ query  {
 }
 `
 
-export const CREATE_BOOK = gql` 
-mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String!]!) {
-  addBook(
-      title: $title,
-      author: $author,
-      published: $published,
-      genres: $genres
-  ) {
-    title
-    published
-    author
-  }
-}
-`
-
 export const EDIT_BIRTHYEAR = gql`
-  mutation editBirthYear($name: String!, $born: Int!) {
-    editAuthor(name: $name, setBornTo: $born) {
-       name
-       born
-       id
-      }
+  mutation editBirthYear($name: String!, $setBornTo: Int!) {
+    editAuthor(
+      name: $name,
+      setBornTo: $setBornTo
+    ) {
+      name
+      born
     }
+  }
 `
 
 
