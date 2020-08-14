@@ -21,8 +21,6 @@ const Books = (props) => {
   }
 }, [result.data ])
 
-console.log(books)
-
   if (!props.show) {
     return null
   }

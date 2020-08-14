@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { useMutation } from '@apollo/client'
-import { CREATE_BOOK, GET_ALL_BOOKS, GET_ALL_AUTHORS } from '../queries'
+import { useMutation, useSubscription, useApolloClient  } from '@apollo/client'
+import { CREATE_BOOK, GET_ALL_BOOKS, GET_ALL_AUTHORS, BOOK_ADDED } from '../queries'
 
 
 const NewBook = ({ show, setError }) => {
+  const client = useApolloClient()
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
@@ -14,9 +15,36 @@ const NewBook = ({ show, setError }) => {
   const [ createBook ] = useMutation(CREATE_BOOK, {
     refetchQueries: [{ query: GET_ALL_BOOKS }, { query: GET_ALL_AUTHORS }],
     onError: (error) => {
+      if (error === 'undefined') return null 
       setError(error.graphQLErrors[0].message)
-    }
+    },
+    update: (store, response) => {
+      updateCacheWith(response.data.addBook);
+  }
   })
+
+  const updateCacheWith = (addedBook) => {
+    const includedIn = (set, object) => {
+        console.log(object, addedBook)
+        return set.map(p => p.id).includes(object.id)
+    }
+    const dataInStore = client.readQuery({ query: GET_ALL_BOOKS })
+    if (!includedIn(dataInStore.allBooks, addedBook)) {
+        dataInStore.allBooks.concat(addedBook)
+        client.writeQuery({
+            query: GET_ALL_BOOKS,
+            data: dataInStore
+        })
+    }
+}
+
+useSubscription(BOOK_ADDED, {
+  onSubscriptionData: ({ subscriptionData }) => {
+      const newBook = subscriptionData.data.bookAdded
+      setError(`${newBook.title} added`)
+      updateCacheWith(newBook)
+  }
+})
 
   if (!show) {
     return null
@@ -24,10 +52,7 @@ const NewBook = ({ show, setError }) => {
 
   const submit = async (event) => {
     event.preventDefault()
-    
-    console.log('add book...')
-
-    createBook({ 
+    await createBook({ 
       variables: { 
         title, 
         published, 
@@ -70,7 +95,7 @@ const NewBook = ({ show, setError }) => {
           <input
             type='number'
             value={published}
-            onChange={({ target }) => setPublished(parseInt((target.value)))}
+            onChange={({ target }) => setPublished(parseInt(target.value))}
           />
         </div>
         <div>

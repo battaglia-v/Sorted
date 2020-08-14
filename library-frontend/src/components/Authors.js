@@ -9,7 +9,7 @@ const Authors = ({ show, setError }) => {
   const [ authors, setAuthors ] = useState('')
   const [ born, setBorn] = useState('')
 
-  const getAllAuthors = useQuery(GET_ALL_AUTHORS);
+  const getAllAuthors = useQuery(GET_ALL_AUTHORS)
 
   useEffect(() => {
     if (getAllAuthors.data) {
@@ -37,24 +37,6 @@ const Authors = ({ show, setError }) => {
     setAuthor('')
     setBorn('')
   }
-
-//   useEffect(() => {
-//   if (getAllAuthors.data) {
-//     const authorList = getAllAuthors.data.allAuthors
-//     setAuthors(authorList)
-//   }
-// }, [getAllAuthors.data])
-
-// const [ changeBirthYear ] = useMutation(EDIT_BIRTHYEAR)
-
-// const updateBirthYear = (event) => {
-//   event.preventDefault()
-
-//   changeBirthYear({ variables: { name, born } })
-
-//   setName('')
-//   setBorn('')
-// }
 
 if (!show) {
   return null
