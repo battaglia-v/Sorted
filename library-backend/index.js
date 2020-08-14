@@ -1,18 +1,17 @@
-require('dotenv').config()
-const { ApolloServer, UserInputError, gql } = require('apollo-server')
+const config = require('./config/config');
+const { ApolloServer, UserInputError, gql, AuthenticationError } = require('apollo-server')
+const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
-
 const Author = require('./models/author')
 const Book = require('./models/book')
+const User = require('./models/user')
 
 mongoose.set('useFindAndModify', false)
 mongoose.set('useCreateIndex', true)
 
-const MONGODB_URI = process.env.MONGO
+console.log('connecting to', config.MONGODB_URI)
 
-console.log('connecting to', MONGODB_URI)
-
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('connected to MongoDB')
   })
@@ -70,7 +69,7 @@ type Mutation {
       username: String!
       favoriteGenre: String!
     ): User
-      login(
+    login(
       username: String!
       password: String!
     ): Token
@@ -78,17 +77,17 @@ type Mutation {
 `
 
 const resolvers = {
-  Author: {
-    bookCount: async (root) => {
-      const books = await Book.find({})
-      return books.reduce((count, book) => {
-        return book.author.toString() === root.id ? count + 1 : count
-      }, 0)
-    },
-  },
+  // Author: {
+  //   bookCount: async (root) => {
+  //     const books = await Book.find({})
+  //     return books.reduce((count, book) => {
+  //       return book.author.toString() === root.id ? count + 1 : count
+  //     }, 0)
+  //   },
+  // },
   Query: {
-      authorCount: () => Author.collection.countDocuments(),
       bookCount: () => Book.collection.countDocuments(),
+      authorCount: () => Author.collection.countDocuments(),
       allBooks: async (root, args) => {
         if (!args.author && !args.genre) return Book.find({}).populate("author")
 
@@ -146,7 +145,6 @@ Mutation: {
         throw new UserInputError(error.message)
       }
       return book
-      }
   },
   editAuthor: async (root, args, { currentUser }) => {
     if (!currentUser) {
@@ -170,7 +168,7 @@ Mutation: {
   },
   login: async (root, args) => {
     const user = await User.findOne({ username: args.username })
-    if (!user || args.password !== 'password') {
+    if (!user || args.password !== 'secret') {
         throw new UserInputError("wrong credentials")
     }
     const userForToken = {
@@ -181,8 +179,7 @@ Mutation: {
     return { value: jwt.sign(userForToken, config.JWT_SECRET )}
     },
    }
-
-
+}
 
 const server = new ApolloServer({
   typeDefs,

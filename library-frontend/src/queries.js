@@ -20,6 +20,7 @@ query getAllBooks($author: String, $genre: String) {
       name
       born
     }
+    genres
     published
     id
   }
@@ -40,7 +41,9 @@ mutation createBook(
       genres: $genres
   ) {
     title
-    author 
+    author {
+      name
+    }
     published
     genres
     id
@@ -68,3 +71,21 @@ export const FIND_AUTHOR = gql`
     }
   }
 `
+
+export const LOGIN = gql`
+  mutation login($username: String!, $password: String!) {
+    login(username: $username, password: $password)  {
+      value
+    }
+  }
+`
+
+export const GET_CURRENT_USER = gql`
+  query getCurrentUser {
+    me {
+      username
+      favoriteGenre
+      id
+    }
+  }
+`;

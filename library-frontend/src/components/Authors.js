@@ -4,15 +4,10 @@ import { GET_ALL_AUTHORS, EDIT_BIRTHYEAR } from '../queries'
 
 
 
-const Authors = (props) => {
+const Authors = ({ show, setError }) => {
   const [ author, setAuthor ] = useState('')
   const [ authors, setAuthors ] = useState('')
   const [ born, setBorn] = useState('')
-
-  console.log(authors)
-  const handleError = (error) => {
-    console.log(error)
-  }
 
   const getAllAuthors = useQuery(GET_ALL_AUTHORS);
 
@@ -24,8 +19,10 @@ const Authors = (props) => {
   }, [getAllAuthors.data])
 
   const [ editBirthYear ] = useMutation(EDIT_BIRTHYEAR, {
-    onError: handleError,
-    refetchQueries: [{ query: GET_ALL_AUTHORS }]
+    refetchQueries: [{ query: GET_ALL_AUTHORS }],
+    onError: (error) => {
+      setError(error.graphQLErrors[0].message)
+    }
   })
   
   const updateAuthor = async (e) => {
@@ -59,7 +56,7 @@ const Authors = (props) => {
 //   setBorn('')
 // }
 
-if (!props.show) {
+if (!show) {
   return null
 }
 
